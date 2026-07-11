@@ -47,7 +47,7 @@ postSchema.virtual("likesCount").get(function () {
   return this.likes.length;
 });
 postSchema.virtual("commentsCount").get(function () {
-  return this.likes.length;
+  return this.comments.length;
 });
 
 postSchema.index({ createdAt: -1 });

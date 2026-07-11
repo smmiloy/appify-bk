@@ -1,3 +1,5 @@
+import jwt from "jsonwebtoken";
+import { promisify } from "util";
 import { JWT_SECRET } from "../utils/env.js";
 import User from "../models/user.model.js";
 import AppError from "../utils/appError.js";
@@ -7,8 +9,9 @@ import { createSendToken } from "../utils/jwtToken.js";
 const verifyUserFromToken = async (token) => {
   let decoded;
   try {
+    console.log(token);
     decoded = await promisify(jwt.verify)(token, JWT_SECRET);
-    // console.log('Decoded token:', decoded);
+    console.log("Decoded token:", decoded);
   } catch (err) {
     if (err.name === "TokenExpiredError") {
       throw new AppError("Your token has expired! Please log in again.", 401);
