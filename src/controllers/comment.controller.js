@@ -101,3 +101,61 @@ export const getCommentsByPost = catchAsync(async (req, res, next) => {
     data: comments,
   });
 });
+
+export const likeComment = catchAsync(async (req, res, next) => {
+  const { commentId } = req.params;
+  const userId = req.user.id;
+
+  if (!mongoose.isValidObjectId(commentId)) {
+    return next(new AppError("Invalid comment id.", 400));
+  }
+
+  const comment = await Comment.findById(commentId);
+  if (!comment) return next(new AppError("Comment not found.", 404));
+
+  const alreadyLiked = comment.likes.some(
+    (id) => id.toString() === userId.toString(),
+  );
+
+  if (alreadyLiked) {
+    return next(new AppError("You already liked this comment.", 400));
+  }
+
+  comment.likes.push(userId);
+  await comment.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Comment liked successfully.",
+    likesCount: comment.likes.length,
+  });
+});
+
+export const unlikeComment = catchAsync(async (req, res, next) => {
+  const { commentId } = req.params;
+  const userId = req.user.id;
+
+  if (!mongoose.isValidObjectId(commentId)) {
+    return next(new AppError("Invalid comment id.", 400));
+  }
+
+  const comment = await Comment.findById(commentId);
+  if (!comment) return next(new AppError("Comment not found.", 404));
+
+  const alreadyLiked = comment.likes.some(
+    (id) => id.toString() === userId.toString(),
+  );
+
+  if (!alreadyLiked) {
+    return next(new AppError("You haven't liked this comment.", 400));
+  }
+
+  comment.likes.pull(userId);
+  await comment.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Like removed successfully.",
+    likesCount: comment.likes.length,
+  });
+});
